@@ -1,5 +1,17 @@
+# Python
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
 env/
-*.pyc
+*.egg-info/
+
+# Logs
 *.log
+
+# OS-specific
 .DS_Store
+Thumbs.db
