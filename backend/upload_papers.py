@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-import pymupdf
+import fitz
 import os
 import database
 import models
@@ -31,15 +31,22 @@ async def upload_paper(file: UploadFile = File(...), db: Session = Depends(datab
 
 
     metadata_info = metadata.extract_metadata(file_location, file.content_type)
+
     stored_paper = metadata.store_paper_metadata(metadata_info(), file_location, db)
-    metadata.index_paper_in_es(metadata_info(), stored_paper.id)
+    paper_id = stored_paper.git("paper_id")
 
-    return {"filename": file.filename, "metadata": metadata.dict()}
+    indexing_result = metadata.index_paper_in_es(metadata_info, paper_id)
 
+    return {
+        "filename": file.filename,
+        "metadata": metadata_info,
+        "db_status": stored_paper.get("status"),
+        "es_status": indexing_result.get("status")
+    }
 
 def extract_metadata(file_path, file_type):
     if file_type == "application/pdf":
-        doc = pymupdf.open(file_path)
+        doc = fitz.open(file_path)
         title = doc.metadata.get("title", "Unknown")
         author = doc.metadata.get("author", "Unknown")
         abstract = " ".join([page.get_text() for page in doc])
