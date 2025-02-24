@@ -11,7 +11,9 @@ index_mapping = {
             "abstract": {"type": "text"},
             "author": {"type": "text"},
             "published_date": {"type": "date"},
-            "content": {"type": "text"}
+            "content": {"type": "text"},
+            "file_path": {"type": "keyword"},
+            "keywords": {"type": "keyword"},
         }
     }
 }
