@@ -1,4 +1,4 @@
-from models import SessionLocal, User
+from backend.models import SessionLocal, User
 
 session = SessionLocal()
 

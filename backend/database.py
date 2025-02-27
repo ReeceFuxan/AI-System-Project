@@ -1,6 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base
+from backend.models import Base, engine
+
+Base.metadata.create_all(bind=engine)
+
 
 DATABASE_URL = "postgresql+psycopg2://postgres:csci440@localhost/research_db"  # Ensure this matches your DB URL
 
