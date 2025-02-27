@@ -1,10 +1,9 @@
-from fastapi import FastAPI, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from elasticsearch import Elasticsearch, ConnectionError as ESConnectionError
-from backend.models import Paper, User, Topic
-from backend.database import get_db  # Assuming you have a get_db function to manage sessions
-
-app = FastAPI()
+from backend.models import Paper
+from backend.database import get_db
+router = APIRouter()
 
 # Initialize Elasticsearch connection
 try:
@@ -17,7 +16,7 @@ except ESConnectionError:
 index_name = 'papers'
 
 
-@app.get("/list_papers")
+@router.get("/list_papers")
 async def list_papers(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     try:
         papers = db.query(Paper).offset(skip).limit(limit).all()
@@ -38,38 +37,3 @@ async def list_papers(skip: int = 0, limit: int = 10, db: Session = Depends(get_
             for paper in papers
         ]
     }
-
-
-@app.get("/search_papers")
-async def search_papers(query: str = Query(..., min_length=2)):
-    try:
-        # Perform a search in Elasticsearch
-        response = es.search(
-            index=index_name,
-            body={
-                "query": {
-                    "multi_match": {
-                        "query": query,
-                        "fields": ["title", "author", "abstract"]
-                    }
-                }
-            }
-        )
-
-        # Extract search results
-        results = [
-            {
-                "id": hit["_id"],
-                "title": hit["_source"]["title"],
-                "author": hit["_source"]["author"]
-            }
-            for hit in response["hits"]["hits"]
-        ]
-
-    except ESConnectionError:
-        raise HTTPException(status_code=500, detail="Elasticsearch connection error.")
-
-    if not results:
-        raise HTTPException(status_code=404, detail="No matching papers found.")
-
-    return {"results": results}

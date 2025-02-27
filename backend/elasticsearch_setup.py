@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 
 # Connect to Elasticsearch instance
-es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+es = Elasticsearch([{'host': 'localhost', 'port': 9200, 'scheme': 'http'}])
 
 if not es.ping():
     raise ValueError('Elasticsearch connection failed.')
@@ -10,7 +10,7 @@ INDEX_NAME = "papers"
 
 # Define the index settings and mapping
 def create_index():
-    if not es.indices.exits(index=INDEX_NAME):
+    if not es.indices.exists(index=INDEX_NAME):
         es.indices.create(
             index=INDEX_NAME,
             body = {
