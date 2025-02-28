@@ -5,9 +5,14 @@ from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 # Define Base Model for SQLAlchemy
 Base = declarative_base()
 
-# Use Render database URL from environment variable
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://researcg_db_user:QJ7c6auZSrys4jIZpXt3QgDn0gxOofmd@dpg-cv0id4aj1k6c73e9f780-a.oregon-postgres.render.com/researcg_db")
+# Fetch the Render database URL from environment variable
+DATABASE_URL = os.getenv("DATABASE_URL")
 
+# If DATABASE_URL is missing, raise an error (this prevents localhost fallback)
+if not DATABASE_URL:
+    raise ValueError("ERROR: DATABASE_URL is not set. Please configure it in Render.")
+
+# Create the database connection
 engine = create_engine(DATABASE_URL)
 
 # Define Users Table
