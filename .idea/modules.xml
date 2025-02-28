@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+<<<<<<< HEAD
+      <module fileurl="file://$PROJECT_DIR$/.idea/AI-System-Project.iml" filepath="$PROJECT_DIR$/.idea/AI-System-Project.iml" />
+=======
+      <module fileurl="file://$PROJECT_DIR$/.idea/AI_System_Project.iml" filepath="$PROJECT_DIR$/.idea/AI_System_Project.iml" />
+>>>>>>> dd40139 (Initial commit - Flask project with full features)
+    </modules>
+  </component>
+</project>

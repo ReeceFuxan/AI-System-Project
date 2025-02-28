@@ -1,0 +1,10 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+<<<<<<< HEAD
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+=======
+    <inspection_tool class="PyInterpreterInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+>>>>>>> dd40139 (Initial commit - Flask project with full features)
+  </profile>
+</component>
