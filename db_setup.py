@@ -4,17 +4,17 @@ from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
 Base = declarative_base()
 
-# Retrieve the Render Database URL from the environment variable
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://researcg_db_user:QJ7c6auZSrys4jIZpXt3QgDn0gxOofmd@dpg-cv0id4aj1k6c73e9f780-a/researcg_db")
+# Retrieve the DATABASE_URL from Railway Environment Variables
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:axSSQrThoPOcSoDRtEuVloCdzvdcNdFr@postgres.railway.internal:5432/railway")
 
 # Ensure that the database URL is correctly set
 if not DATABASE_URL:
-    raise ValueError("ERROR: DATABASE_URL is not set. Please configure it in Render.")
+    raise ValueError("ERROR: DATABASE_URL is not set. Please configure it in Railway.")
 
-# Debugging: Print the database URL (without password)
-print("Connecting to Database:", DATABASE_URL.replace(DATABASE_URL.split(':')[2], "*****"))
+# Debugging: Print database connection (without password)
+print("Connecting to Database:", DATABASE_URL.split('@')[1])
 
-# Create the database engine with echo=True for debugging
+# Create the database engine
 engine = create_engine(DATABASE_URL, echo=True)
 
 # Define Users Table
@@ -49,3 +49,4 @@ Base.metadata.create_all(engine)
 # Create a Session
 Session = sessionmaker(bind=engine)
 session = Session()
+
