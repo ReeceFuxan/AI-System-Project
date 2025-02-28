@@ -2,18 +2,20 @@ import os
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Text
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
-# Define Base Model for SQLAlchemy
 Base = declarative_base()
 
 # Retrieve the Render Database URL from the environment variable
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://researcg_db_user:QJ7c6auZSrys4jIZpXt3QgDn0gxOofmd@dpg-cv0id4aj1k6c73e9f780-a.oregon-postgres.render.com/researcg_db")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://researg_db_user:YOUR_PASSWORD@dpg-cv0id4aj1k6c73e9f780-a.oregon-postgres.render.com/researg_db")
 
 # Ensure that the database URL is correctly set
 if not DATABASE_URL:
     raise ValueError("ERROR: DATABASE_URL is not set. Please configure it in Render.")
 
-# Create the database engine
-engine = create_engine(DATABASE_URL, echo=True)  # echo=True for debugging (optional)
+# Debugging: Print the database URL (without password)
+print("Connecting to Database:", DATABASE_URL.replace(DATABASE_URL.split(':')[2], "*****"))
+
+# Create the database engine with echo=True for debugging
+engine = create_engine(DATABASE_URL, echo=True)
 
 # Define Users Table
 class User(Base):
@@ -41,7 +43,7 @@ class Topic(Base):
     paper_id = Column(Integer, ForeignKey("papers.id"), nullable=False)
     paper = relationship("Paper", back_populates="topics")
 
-# Create Tables in PostgreSQL (if they don't exist)
+# Create Tables in PostgreSQL
 Base.metadata.create_all(engine)
 
 # Create a Session
