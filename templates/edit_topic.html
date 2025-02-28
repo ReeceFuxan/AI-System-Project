@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Topic</title>
+</head>
+<body>
+    <h1>Edit User</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <p>{{ form.name.label }} {{ form.name(size=20) }}</p>
+        <p>{{ form.email.label }} {{ form.email(size=20) }}</p>
+        <p>{{ form.submit() }}</p>
+    </form>
+    <a href="{{ url_for('home') }}">Back to Home</a>
+</body>
+</html>
