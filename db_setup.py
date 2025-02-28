@@ -1,21 +1,35 @@
 import os
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Text
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from sqlalchemy.exc import OperationalError
 
+# Define Base for SQLAlchemy Models
 Base = declarative_base()
 
-# Retrieve the DATABASE_URL from Railway Environment Variables
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:axSSQrThoPOcSoDRtEuVloCdzvdcNdFr@postgres.railway.internal:5432/railway")
+# Retrieve DATABASE_URL from Railway Environment Variables
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:csci440@localhost:5432/research_db")
 
-# Ensure that the database URL is correctly set
+# If DATABASE_URL is missing, fall back to local PostgreSQL for testing
 if not DATABASE_URL:
-    raise ValueError("ERROR: DATABASE_URL is not set. Please configure it in Railway.")
+    print("⚠️ WARNING: DATABASE_URL not found! Using local PostgreSQL.")
+    DATABASE_URL = "postgresql://postgres:password@localhost:5432/local_db"
 
-# Debugging: Print database connection (without password)
-print("Connecting to Database:", DATABASE_URL.split('@')[1])
+# Debugging: Print the database host (without exposing password)
+try:
+    print("🔗 Connecting to Database:", DATABASE_URL.split('@')[1])
+except IndexError:
+    print("⚠️ ERROR: Invalid DATABASE_URL format!")
 
-# Create the database engine
-engine = create_engine(DATABASE_URL, echo=True)
+# Create Database Engine
+try:
+    engine = create_engine(DATABASE_URL, echo=True, pool_pre_ping=True)
+    connection = engine.connect()  # Test Connection
+    connection.close()
+    print("✅ Database Connection Successful!")
+except OperationalError as e:
+    print("❌ ERROR: Could not connect to the database.")
+    print("🔍 Details:", str(e))
+    exit(1)  # Stop execution if DB is unreachable
 
 # Define Users Table
 class User(Base):
@@ -49,4 +63,3 @@ Base.metadata.create_all(engine)
 # Create a Session
 Session = sessionmaker(bind=engine)
 session = Session()
-
