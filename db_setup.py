@@ -5,7 +5,7 @@ from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 Base = declarative_base()
 
 # Retrieve the Render Database URL from the environment variable
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://researg_db_user:YOUR_PASSWORD@dpg-cv0id4aj1k6c73e9f780-a.oregon-postgres.render.com/researg_db")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://researcg_db_user:QJ7c6auZSrys4jIZpXt3QgDn0gxOofmd@dpg-cv0id4aj1k6c73e9f780-a/researcg_db")
 
 # Ensure that the database URL is correctly set
 if not DATABASE_URL:
