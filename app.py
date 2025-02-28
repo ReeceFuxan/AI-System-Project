@@ -3,6 +3,7 @@ from db_setup import session, User, Paper, Topic
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField
 from wtforms.validators import DataRequired
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecretkey'  # Needed for form security
@@ -128,5 +129,8 @@ def delete_topic(topic_id):
         session.commit()
     return redirect(url_for("home"))
 
+# Ensure the app runs correctly on Render
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))  # Bind Render's expected port
+    app.run(host="0.0.0.0", port=port)
+
