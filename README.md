@@ -10,14 +10,18 @@ This project is an AI-powered recommendation system designed to help researchers
 - **External Integrations:** Connects with major research databases (planned feature).
 
 ## Technologies Used
-- Python 3.x
+- Python 3.11 (or older)
 - Machine Learning Libraries: Scikit-learn, TensorFlow, or PyTorch (TBD)
-- Natural Language Processing (NLP): spaCy or NLTK
-- Database: SQLite or PostgreSQL (TBD)
+- Natural Language Processing (NLP): spaCy
+- Database: PostgreSQL 
 - Frontend: JavaFX (for GUI, if applicable)
 
 ## Setup Instructions
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/ai-paper-recommender.git
-   cd ai-paper-recommender
+   git clone https://github.com/ReeceFuxan/AI-System-Project.git
+
+2. ```bash
+   cd AI-System-Project
+	or
+   cd C:/path/path/AI-System-Project

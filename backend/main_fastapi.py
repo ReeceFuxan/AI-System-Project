@@ -11,5 +11,4 @@ app = FastAPI()
 app.include_router(upload_paper, prefix="/papers")
 app.include_router(list_papers, prefix="/papers")
 app.include_router(delete_paper, prefix="/papers")
-
 app.include_router(search_papers, prefix="/papers")
