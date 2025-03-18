@@ -1,28 +1,24 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, Query, Request, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Query, Request, Depends
 from fastapi.responses import JSONResponse
 import json
 from sqlalchemy.orm import Session
 from elasticsearch import Elasticsearch, ConnectionError as ESConnectionError
 from backend import database, metadata, models, elasticsearch_setup
+from backend.elasticsearch_setup import es
 from backend.models import Paper, PaperMetadata
 from backend.database import get_db
 from backend.metadata import store_paper_metadata, index_paper_in_es
+from backend.similarty import compute_tfidf_embeddings, compute_word2vec_embeddings, get_papers_from_db, calculate_similarity_between_papers, store_similarity_scores_in_db
 from pydantic import BaseModel
 import fitz
 import os
+from sklearn.feature_extraction.text import TfidfVectorizer
+from gensim.models import Word2Vec
+from sklearn.preprocessing import normalize
+import numpy as np
+
 
 router = APIRouter()
-
-# Initialize Elasticsearch connection
-try:
-    es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-    if not es.ping():
-        raise ValueError("Elasticsearch connection failed.")
-except ESConnectionError:
-    raise HTTPException(status_code=500, detail="Elasticsearch is not running.")
-
-index_name = 'papers'
-
 
 @router.get("/search_papers")
 async def search_papers(request: Request, query: str = Query(..., min_length=2), ignore_unavailable: bool = Query(False)):
@@ -107,6 +103,20 @@ async def upload_paper(file: UploadFile = File(...), db: Session = Depends(datab
         # Store the paper metadata in the database
         stored_paper = store_paper_metadata(metadata_info.dict(), file_location, db)
 
+        # Extract content (abstract) for embeddings
+        paper_content = metadata_info.abstract
+
+        tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+        tfidf_vector = tfidf_vectorizer.fit_transform([paper_content])
+        tfidf_vector_normalized = normalize(tfidf_vector, norm='l2')
+
+        tokens = paper_content.lower().split()
+        w2v_model = Word2Vec(sentences=[tokens], vector_size=100, window=5, min_count=1)
+        word2vec_vector = np.mean([w2v_model.wv[word] for word in tokens if word in w2v_model.wv], axis=0)
+        word2vec_vector_normalized = normalize([word2vec_vector], norm='l2')[0]
+
+        store_embeddings_in_db(file.filename, tfidf_vector_normalized, word2vec_vector_normalized)
+
         # Index the paper in Elasticsearch
         indexing_result = index_paper_in_es(metadata_info.dict(), stored_paper.id)
 
@@ -167,3 +177,32 @@ async def delete_paper(paper_id: int, db: Session = Depends(database.get_db)):
     db.commit()
 
     return {"detail": f"Paper {paper_id} deleted successfully"}
+
+@router.get("/recommend_papers")
+async def recommend_papers(query: str = Query(..., min_length=2), db: Session = Depends(get_db)):
+    papers, texts = get_papers_from_db(db)
+
+    # Compute embeddings
+    tfidf_embeddings = compute_tfidf_embeddings(texts)
+    w2v_embeddings = compute_word2vec_embeddings(texts)
+
+    # Calculate similarities
+    similarities = calculate_similarity_between_papers(tfidf_embeddings, w2v_embeddings)
+
+    # Store similarities in the database
+    store_similarity_scores_in_db(similarities, db)
+
+    # Fetch top recommendations based on the highest similarity score
+    recommendations = []
+    for sim in similarities:
+        paper = db.query(Paper).filter(Paper.id == sim["paper_id"]).first()
+        recommendations.append({
+            "paper_id": paper.id,
+            "title": paper.title,
+            "similarity_score": max(sim["tfidf_similarity"])
+        })
+
+    # Sort recommendations based on similarity score
+    recommendations = sorted(recommendations, key=lambda x: x["similarity_score"], reverse=True)[:5]
+
+    return {"recommendations": recommendations}

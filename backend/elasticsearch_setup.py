@@ -1,11 +1,11 @@
 from elasticsearch import Elasticsearch
 
-# Connect to Elasticsearch instance
 es = Elasticsearch([{'host': 'localhost', 'port': 9200, 'scheme': 'http'}])
 
-
 if not es.ping():
-    raise ValueError('Elasticsearch connection failed.')
+    raise ValueError("Elasticsearch connection failed.")
+else:
+    print("Elasticsearch connection successful.")
 
 INDEX_NAME = "papers"
 

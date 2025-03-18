@@ -51,4 +51,15 @@ class PaperMetadata(BaseModel):
             "author": self.author
         }
 
+class PaperSimilarity(Base):
+    __tablename__ = 'paper_similarities'
+    id = Column(Integer, primary_key=True, index=True)
+    paper1_id = Column(Integer, ForeignKey('papers.id'))
+    paper2_id = Column(Integer, ForeignKey('papers.id'))
+    tfidf_similarity = Column(Integer)
+    w2v_similarity = Column(Integer)
+
+    paper1 = relationship("Paper", foreign_keys=[paper1_id])
+    paper2 = relationship("Paper", foreign_keys=[paper2_id])
+
 Base.metadata.create_all(bind=engine)
