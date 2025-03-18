@@ -11,12 +11,12 @@ This project is an AI-powered recommendation system designed to help researchers
 
 ## Technologies Used
 - Python 3.11 (or older)
-- Machine Learning Libraries: Scikit-learn, TensorFlow, or PyTorch (TBD)
+- Machine Learning Libraries: Scikit-learn
 - Natural Language Processing (NLP): spaCy
 - Database: PostgreSQL 
 - Frontend: JavaFX (for GUI, if applicable)
 
-## Setup Instructions
+## Setup Instructions (For Programmers to edit)
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/ReeceFuxan/AI-System-Project.git
@@ -25,3 +25,27 @@ This project is an AI-powered recommendation system designed to help researchers
    cd AI-System-Project
 	or
    cd C:/path/path/AI-System-Project
+
+!! Committing Changes
+git status
+git add .
+git commit -m "Message"
+git push origin main
+
+3. Run ElasticSearch (depends on install) NEW BASH WINDOW
+   Reece - I created its own folder in my C: drive
+   ```bash
+   cd C:/elasticsearch/bin
+   cmd elasticsearch.bat
+
+   !! Check if running using browser
+   http://localhost:9200
+
+4. Run Uvicorn for FastAPI NEW BASH WINDOW
+   ```bash
+   cd C:/AI-System-Project
+   source env/Scripts/Activate
+   python -m uvicorn backend.main_fastapi:app --reload
+
+## Setup Instructions (For Users of the System)
+Will Edit to include instructions
