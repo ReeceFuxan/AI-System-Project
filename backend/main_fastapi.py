@@ -8,7 +8,7 @@ from backend.elasticsearch_setup import es
 from backend.models import Paper, PaperMetadata
 from backend.database import get_db
 from backend.metadata import store_paper_metadata, index_paper_in_es
-from backend.similarty import compute_tfidf_embeddings, compute_word2vec_embeddings, get_papers_from_db, calculate_similarity_between_papers, store_similarity_scores_in_db
+from backend.similarity import compute_tfidf_embeddings, compute_word2vec_embeddings, get_papers_from_db, calculate_similarity_between_papers, store_similarity_scores_in_db
 from pydantic import BaseModel
 import fitz
 import os
