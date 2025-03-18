@@ -1,5 +1,5 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pariwise import cosine_similarity
+from sklearn.metrics.pairwise import cosine_similarity
 from gensim.models import Word2Vec
 from sklearn.preprocessing import normalize
 from sqlalchemy.orm import Session
