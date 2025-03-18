@@ -1,6 +1,6 @@
 from elasticsearch import Elasticsearch
 
-es = Elasticsearch([{'host': 'localhost', 'port': 9200, 'scheme': 'http'}])
+es = Elasticsearch(hosts=["http://localhost:9200"])
 
 if not es.ping():
     raise ValueError("Elasticsearch connection failed.")
