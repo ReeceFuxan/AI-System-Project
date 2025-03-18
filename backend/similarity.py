@@ -1,15 +1,10 @@
-import gensim
-from fastapi import FastAPI, Depends
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from gensim.models import Word2Vec, KeyedVectors
+from sklearn.metrics.pariwise import cosine_similarity
+from gensim.models import Word2Vec
 from sklearn.preprocessing import normalize
 from sqlalchemy.orm import Session
-from backend.database import get_db
 from backend.models import Paper
 import numpy as np
-
-model = gensim.models.KeyedVectors.load_word2vec_format('./data/GoogleNews-vectors-negative300.bin.gz', binary=True) 
 
 # Retrieve the papers' content from the database
 def get_papers_from_db(db: Session):
@@ -17,8 +12,13 @@ def get_papers_from_db(db: Session):
     texts = [paper.content for paper in papers if paper.content]  # Ensure there's content
     return papers, texts
 
+papers, texts = get_papers_from_db(db)
+
+#Checking the similarity
+w2v_model = KeyedVectors.load_word2vec_format('path_to_pretrained_model.bin', binary=True)
+
 def tokenize(text):
-    return text.lower().split()
+    return text.lower().split()  # Simple whitespace tokenizer; can be replaced by more complex ones
 
 tokenized_papers = [tokenize(paper) for paper in papers]
 
@@ -49,8 +49,10 @@ def compute_word2vec_embeddings(texts):
     """Compute Word2Vec embeddings for the given texts."""
     tokenized_papers = [text.lower().split() for text in texts]
 
+    # Train Word2Vec model or load a pre-trained one
     w2v_model = Word2Vec(tokenized_papers, vector_size=100, window=5, min_count=1, workers=4)
 
+    # Function to get embedding for a paper
     def get_w2v_embedding(tokens, model):
         embeddings = [model.wv[word] for word in tokens if word in model.wv]
         return np.mean(embeddings, axis=0) if embeddings else np.zeros(model.vector_size)
