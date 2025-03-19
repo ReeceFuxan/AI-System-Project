@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
-from backend.models import Base, PaperSimilarity
+from backend.models import Base, PaperSimilarity, engine
 
 # Database connection URL
 DATABASE_URL = "postgresql+psycopg2://postgres:csci440@localhost/research_db"  # Ensure this matches your actual PostgreSQL setup
@@ -17,7 +18,6 @@ Base.metadata.create_all(bind=engine)
 
 # Dependency function to provide a database session
 def get_db():
-    """ Dependency to get the database session """
     db = SessionLocal()
     try:
         yield db
@@ -55,3 +55,4 @@ def store_user_preferences(user_id: int, interests: str, db: Session):
 
     db.commit()
     return {"message": "User preferences updated successfully"}
+

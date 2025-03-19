@@ -1,6 +1,9 @@
 from elasticsearch import Elasticsearch
+from typing import List
+import json
+import os
 
-es = Elasticsearch(hosts=["http://localhost:9200"])
+es = Elasticsearch("http://localhost:9200")
 
 if not es.ping():
     raise ValueError("Elasticsearch connection failed.")
@@ -46,3 +49,27 @@ def index_paper_in_elasticsearch(paper_id: int, title: str, author: str, abstrac
     return response
 
 create_index()
+
+
+def load_papers_from_ndjson(file_path: str) -> List[dict]:
+    papers = []
+    with open('C:/System-Project/kibana.ndjson', 'r') as file:
+        for line in file:
+            papers.append(json.loads(line))
+    return papers
+
+def process_paper_data(papers: List[dict]):
+    for paper in papers:
+        title = paper.get('title')
+        abstract = paper.get('abstract')
+        authors = paper.get('authors')
+
+        print(f"Title: {title}")
+        print(f"Abstract: {abstract}")
+        print(f"Authors: {authors}")
+        print("-" * 80)
+
+if __name__ == "__main__":
+    file_path = "C:/AI-System-Project/kibana.ndjson"
+    papers = load_papers_from_ndjson(file_path)
+    process_paper_data(papers)

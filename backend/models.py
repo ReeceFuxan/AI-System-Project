@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from pydantic import BaseModel
+from backend import database
 
 DATABASE_URL = "postgresql+psycopg2://postgres:csci440@localhost/research_db"
 engine = create_engine(DATABASE_URL)
@@ -74,6 +75,5 @@ class PaperSimilarity(Base):
 
     paper1 = relationship("Paper", foreign_keys=[paper1_id])
     paper2 = relationship("Paper", foreign_keys=[paper2_id])
-
 
 Base.metadata.create_all(bind=engine)
