@@ -73,3 +73,4 @@ if __name__ == "__main__":
     file_path = "C:/AI-System-Project/kibana.ndjson"
     papers = load_papers_from_ndjson(file_path)
     process_paper_data(papers)
+

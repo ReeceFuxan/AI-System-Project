@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from elasticsearch import Elasticsearch, ConnectionError as ESConnectionError
 from backend import database, metadata, models, elasticsearch_setup
 from backend.elasticsearch_setup import es
-from backend.models import Paper, PaperMetadata, User, UserProcfile
+from backend.models import Paper, PaperMetadata, User, UserProfile
 from backend.database import get_db
 from backend.metadata import store_paper_metadata, index_paper_in_es
 from backend.similarity import compute_tfidf_embeddings, get_papers_from_db, calculate_similarity_between_papers, \

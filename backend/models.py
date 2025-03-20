@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from pydantic import BaseModel
 from backend import database
+from typing import List
 
 DATABASE_URL = "postgresql+psycopg2://postgres:csci440@localhost/research_db"
 engine = create_engine(DATABASE_URL)
