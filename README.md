@@ -46,8 +46,3 @@ git push origin main
    cd C:/AI-System-Project
    source env/Scripts/Activate
    python -m uvicorn backend.main_fastapi:app --reload
-
-5. install **GoogleNews-vectors-negative300.bin.gz** and save it to **C:/AI-System-Project/models**
-
-## Setup Instructions (For Users of the System)
-Will Edit to include instructions
