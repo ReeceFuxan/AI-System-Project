@@ -6,7 +6,7 @@ from gensim.models import Word2Vec, KeyedVectors
 from sklearn.preprocessing import normalize
 from sqlalchemy.orm import Session
 from backend.database import get_db
-from backend.models import Paper
+from backend.models import Paper, PaperSimilarity
 import numpy as np
 import gensim.downloader as api
 from gensim.models import Word2Vec
@@ -18,8 +18,7 @@ model = api.load("glove-wiki-gigaword-100")
 # Retrieve the papers' content from the database
 def get_papers_from_db(db: Session):
     papers = db.query(Paper).all()
-    texts = [paper.content for paper in papers if paper.content]  # Ensure there's content
-    return papers, texts
+    return papers, [paper.content for paper in papers if paper.content]
 
 def tokenize(text):
     return text.lower().split()
@@ -33,13 +32,13 @@ def get_word2vec_embedding(tokens, model):
 
 #similarity calculation
 def compute_cosine_similarity(embedding1, embedding2):
-    return cosine_similarity([embedding1], [embedding2])[0][0]
+    return cosine_similarity(embedding1.reshape(1, -1), embedding2.reshape(1, -1))[0][0]
 
 @app.get("/papers")
 def get_similarities(db: Session = Depends(get_db)):
     papers, texts = get_papers_from_db(db)
 
-    tokenized_papers = [tokenize(paper) for paper in papers]
+    tokenized_papers = [tokenize(paper.content) for paper in papers if paper.content]
 
     w2v_embeddings = [get_word2vec_embedding(tokens, model) for tokens in tokenized_papers]
     w2v_embeddings = normalize(w2v_embeddings, axis=1)
@@ -53,37 +52,34 @@ def get_similarities(db: Session = Depends(get_db)):
     return {"similarities": similarities}
 
 def compute_tfidf_embeddings(texts):
-    print(f"Raw texts before filtering: {texts}")  # Debugging line
+    print(f"Raw texts before filtering: {texts}")
     texts = [text for text in texts if text.strip()]
-    print(f"Filtered texts: {texts}")  # Debugging line
+    print(f"Filtered texts: {texts}")
     if not texts:
         raise ValueError("No valid text documents found to process")
 
-    texts = [text for text in texts if text.strip()]
     tfidf_vectorizer = TfidfVectorizer(stop_words="english")
     tfidf_matrix = tfidf_vectorizer.fit_transform(texts)
     tfidf_normalized = normalize(tfidf_matrix, axis=1)
     return tfidf_normalized
 
-def calculate_similarity_between_papers(tfidf_embeddings, w2v_embeddings):
-    similarities = []
+def calculate_similarity_between_papers(tfidf_embeddings, w2v_embeddings, papers):
+    similarities = calculate_similarity_between_papers(tfidf_embeddings, w2v_embeddings, papers)
     for i in range(len(tfidf_embeddings)):
         for j in range(i + 1, len(tfidf_embeddings)):
             tfidf_sim = compute_cosine_similarity(tfidf_embeddings[i], tfidf_embeddings[j])
             w2v_sim = compute_cosine_similarity(w2v_embeddings[i], w2v_embeddings[j])
             similarities.append({
-                "paper1_id": i,
-                "paper2_id": j,
+                "paper1_id": papers[i].id,
+                "paper2_id": papers[j].id,
                 "tfidf_similarity": tfidf_sim,
                 "w2v_similarity": w2v_sim
             })
     return similarities
 
-def store_similarity_scores_in_db(similarity_data, db):
-    # Implement storing similarity data to the database
+def store_similarity_scores_in_db(similarity_data, db: Session):
     for similarity in similarity_data:
-        # Assuming you have a Similarity model, store the scores
-        similarity_record = Similarity(
+        similarity_record = PaperSimilarity(
             paper1_id=similarity['paper1_id'],
             paper2_id=similarity['paper2_id'],
             tfidf_similarity=similarity['tfidf_similarity'],

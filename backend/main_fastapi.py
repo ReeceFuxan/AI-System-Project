@@ -1,5 +1,7 @@
 from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Query, Request, Depends
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 import json
 from sqlalchemy.orm import Session
 from elasticsearch import Elasticsearch, ConnectionError as ESConnectionError
@@ -17,9 +19,21 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from gensim.models import Word2Vec
 from sklearn.preprocessing import normalize
 import numpy as np
+from typing import List
 
 app = FastAPI()
 router = APIRouter()
+
+frontend_path = os.path.join(os.path.dirname(__file__), "frontend_build")
+app.mount("/statis", StaticFiles(directory=frontend_path, html=True), name="frontend")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # --- User Profile API Models ---
 class UserPreferencesRequest(BaseModel):
@@ -124,6 +138,7 @@ async def search_papers(query: str = Query(..., min_length=2), ignore_unavailabl
 
 @router.get("/list_papers")
 async def list_papers(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    print("list_papers endpoint hit")
     try:
         papers = db.query(Paper).offset(skip).limit(limit).all()
     except Exception as e:
@@ -238,13 +253,19 @@ async def recommend_papers(paper_id: int, db: Session = Depends(get_db)):
     recommendations = []
     for sim in similarities:
         paper = db.query(Paper).filter(Paper.id == sim["paper_id"]).first()
-        recommendations.append({
-            "paper_id": paper.id,
-            "title": paper.title,
-            "similarity_score": max(sim["tfidf_similarity"])
-        })
 
-    recommendations = sorted(recommendations, key=lambda x: x["similarity_score"], reverse=True[:5])
+        if paper:
+            recommendations.append({
+                "paper_id": paper.id,
+                "title": paper.title,
+                "similarity_score": max(sim["tfidf_similarity"])
+            })
+
+    if not recommendations:
+        print("No recommendations generated!")  # DEBUG
+        return {"error": "No recommendations generated"}
+
+    recommendations = sorted(recommendations, key=lambda x: x["similarity_score"], reverse=True)[:5]
 
     return {"recommendations": recommendations}
 app.include_router(router)
