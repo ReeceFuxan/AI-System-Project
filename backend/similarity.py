@@ -8,10 +8,12 @@ from sqlalchemy.orm import Session
 from backend.database import get_db
 from backend.models import Paper
 import numpy as np
+import gensim.downloader as api
+from gensim.models import Word2Vec
 
 app = FastAPI()
 
-model = gensim.models.KeyedVectors.load_word2vec_format('C:/AI-System-Project/models/GoogleNews-vectors-negative300.bin.gz', binary=True)
+model = api.load("glove-wiki-gigaword-100")
 
 # Retrieve the papers' content from the database
 def get_papers_from_db(db: Session):
