@@ -15,17 +15,14 @@ from backend.similarity import compute_tfidf_embeddings, get_papers_from_db, cal
 from pydantic import BaseModel
 import fitz
 import os
-from sklearn.feature_extraction.text import TfidfVectorizer
-from gensim.models import Word2Vec
-from sklearn.preprocessing import normalize
-import numpy as np
 from typing import List
+from backend.serpapi import search_scholar
 
 app = FastAPI()
 router = APIRouter()
 
 frontend_path = os.path.join(os.path.dirname(__file__), "frontend_build")
-app.mount("/statis", StaticFiles(directory=frontend_path, html=True), name="frontend")
+app.mount("/static", StaticFiles(directory=frontend_path, html=True), name="frontend")
 
 app.add_middleware(
     CORSMiddleware,
@@ -46,6 +43,13 @@ class UpdateProfileRequest(BaseModel):
     new_interest: str  # New interest to add
 
 # --- User Profile Endpoints ---
+@router.get("/search_google_scholar")
+async def search_google_scholar(query: str):
+        results = search_scholar(query, "8e3cff5b6a098f3601a66efc50be35922d03696532fd75e06c6d473a2acc4fec")
+        papers = results.get("organic_results", [])
+        return [{"title": p.get("title"), "link": p.get("link")} for p in papers]
+
+
 @router.post("/user_preferences")
 async def set_user_preferences(preferences: UserPreferencesRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == preferences.user_id).first()
@@ -258,7 +262,7 @@ async def recommend_papers(paper_id: int, db: Session = Depends(get_db)):
             recommendations.append({
                 "paper_id": paper.id,
                 "title": paper.title,
-                "similarity_score": max(sim["tfidf_similarity"])
+                "similarity_score": sim["tfidf_similarity"]
             })
 
     if not recommendations:

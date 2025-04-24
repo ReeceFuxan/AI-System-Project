@@ -8,7 +8,7 @@ function App() {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
 
-    // Fetch list of papers on component mount
+    // Fetch list of papers on component mount (optional if you want to display papers)
     useEffect(() => {
         fetchPapers();
     }, []);
@@ -24,10 +24,12 @@ function App() {
 
     const searchPapers = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/search_papers`, {
+            // Make the request to search Google Scholar using the /search_google_scholar endpoint
+            const response = await axios.get(`${API_BASE_URL}/search_google_scholar`, {
                 params: { query: searchQuery },
             });
-            setSearchResults(response.data.results);
+            // Store the search results from Google Scholar
+            setSearchResults(response.data);
         } catch (error) {
             console.error("Error searching papers:", error);
         }
@@ -47,16 +49,19 @@ function App() {
             <button onClick={searchPapers}>Search</button>
 
             {/* Search Results */}
-            <h2>Search Results</h2>
+            <h2>Search Results from Google Scholar</h2>
             <ul>
-                {searchResults.map((paper) => (
-                    <li key={paper.ID}>
-                        <strong>{paper.Title}</strong> by {paper.Author}
+                {searchResults.map((paper, index) => (
+                    <li key={index}>
+                        <strong>{paper.title}</strong> <br />
+                        <a href={paper.link} target="_blank" rel="noopener noreferrer">
+                            {paper.link}
+                        </a>
                     </li>
                 ))}
             </ul>
 
-            {/* List of Papers */}
+            {/* List of Papers (if you want to keep this section for displaying all papers) */}
             <h2>All Papers</h2>
             <ul>
                 {papers.map((paper) => (
