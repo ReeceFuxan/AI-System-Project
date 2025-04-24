@@ -46,3 +46,11 @@ git push origin main
    cd C:/AI-System-Project
    source env/Scripts/Activate
    python -m uvicorn backend.main_fastapi:app --reload
+
+5. Run Npm to start backend dashboard
+   ``` bash
+   cd C:/AI-System-Project/frontend
+   source env/Scripts/Activate
+   npm start
+
+6. search anything in the menu and press the search button
