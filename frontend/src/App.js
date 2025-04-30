@@ -23,17 +23,29 @@ function App() {
     };
 
     const searchPapers = async () => {
-        try {
-            // Make the request to search Google Scholar using the /search_google_scholar endpoint
-            const response = await axios.get(`${API_BASE_URL}/search_google_scholar`, {
-                params: { query: searchQuery },
-            });
-            // Store the search results from Google Scholar
-            setSearchResults(response.data);
-        } catch (error) {
-            console.error("Error searching papers:", error);
-        }
-    };
+    try {
+        const scholarResponse = await axios.get(`${API_BASE_URL}/search_google_scholar`, {
+            params: { query: searchQuery },
+        });
+        const similarityResponse = await axios.get(`${API_BASE_URL}/query_similarity`, {
+            params: { query: searchQuery },
+        });
+
+        const similarityMap = {};
+        similarityResponse.data.results.forEach(item => {
+            similarityMap[item.title.toLowerCase()] = item.similarity_score;
+        });
+
+        const enrichedResults = scholarResponse.data.map(paper => ({
+            ...paper,
+            similarity_score: similarityMap[paper.title.toLowerCase()] || 0,
+        }));
+
+        setSearchResults(enrichedResults);
+    } catch (error) {
+        console.error("Error searching papers:", error);
+    }
+};
 
     return (
         <div>
@@ -52,14 +64,16 @@ function App() {
             <h2>Search Results from Google Scholar</h2>
             <ul>
                 {searchResults.map((paper, index) => (
-                    <li key={index}>
-                        <strong>{paper.title}</strong> <br />
-                        <a href={paper.link} target="_blank" rel="noopener noreferrer">
-                            {paper.link}
-                        </a>
+                     <li key={index}>
+                         <strong>{paper.title}</strong> <br />
+                         <a href={paper.link} target="_blank" rel="noopener noreferrer">
+                             {paper.link}
+                         </a> <br />
+                         <em>Similarity Score:</em> {paper.similarity_score.toFixed(3)}
                     </li>
                 ))}
             </ul>
+
 
             {/* List of Papers (if you want to keep this section for displaying all papers) */}
             <h2>All Papers</h2>

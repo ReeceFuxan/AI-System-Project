@@ -10,16 +10,20 @@ from backend.elasticsearch_setup import es
 from backend.models import Paper, PaperMetadata, User, UserProfile
 from backend.database import get_db
 from backend.metadata import store_paper_metadata, index_paper_in_es
-from backend.similarity import compute_tfidf_embeddings, get_papers_from_db, calculate_similarity_between_papers, \
-    store_similarity_scores_in_db
+from backend.similarity import router as similarity_router
+from backend.similarity import compute_cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from backend.serpapi import search_scholar
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 from pydantic import BaseModel
 import fitz
 import os
 from typing import List
-from backend.serpapi import search_scholar
-
 app = FastAPI()
 router = APIRouter()
+app.include_router(similarity_router)
 
 frontend_path = os.path.join(os.path.dirname(__file__), "frontend_build")
 app.mount("/static", StaticFiles(directory=frontend_path, html=True), name="frontend")
@@ -128,7 +132,7 @@ async def search_papers(query: str = Query(..., min_length=2), ignore_unavailabl
                 "Title": hit["_source"].get("title", "No Title"),
                 "Author": hit["_source"].get("author", "Unknown Author"),
                 "Content": hit["_source"].get("content", "No Content"),
-                "Relevance Score": round(hit["_score"], 2),
+                "Similarity Score": round(hit["_score"], 2),
             }
             for hit in hits
         ]
