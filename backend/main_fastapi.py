@@ -49,10 +49,8 @@ class UpdateProfileRequest(BaseModel):
 # --- User Profile Endpoints ---
 @router.get("/search_google_scholar")
 async def search_google_scholar(query: str):
-        results = search_scholar(query, "8e3cff5b6a098f3601a66efc50be35922d03696532fd75e06c6d473a2acc4fec")
-        papers = results.get("organic_results", [])
-        return [{"title": p.get("title"), "link": p.get("link")} for p in papers]
-
+        papers = search_scholar(query, "8e3cff5b6a098f3601a66efc50be35922d03696532fd75e06c6d473a2acc4fec")
+        return [{"title": p.get("title"), "link": p.get("link"), "year": p.get("year")} for p in papers]
 
 @router.post("/user_preferences")
 async def set_user_preferences(preferences: UserPreferencesRequest, db: Session = Depends(get_db)):
@@ -181,9 +179,12 @@ async def upload_paper(file: UploadFile = File(...), db: Session = Depends(datab
 
         metadata_info = extract_metadata(file_location, file.content_type)
 
-        stored_paper = store_paper_metadata(metadata_info.dict(), file_location, db)
+        paper_content = metadata_info.content or metadata_info.abstract
 
-        paper_content = metadata_info.abstract
+        metadata_dict = metadata_info.dict()
+        metadata_dict["content"] = paper_content
+
+        stored_paper = store_paper_metadata(metadata_dict, file_location, db)
 
         tfidf_vectorizer = TfidfVectorizer(stop_words='english')
         tfidf_vector = tfidf_vectorizer.fit_transform([paper_content])

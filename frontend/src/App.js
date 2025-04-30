@@ -7,8 +7,22 @@ function App() {
     const [papers, setPapers] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
+    const [file, setFile] = useState(null);
 
-    // Fetch list of papers on component mount (optional if you want to display papers)
+    const uploadPaper = async () => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/upload_paper`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      console.log("Upload Response:", response.data);
+    } catch (error) {
+      console.error("Error uploading paper:", error);
+    }
+  };
+
     useEffect(() => {
         fetchPapers();
     }, []);
@@ -69,13 +83,23 @@ function App() {
                          <a href={paper.link} target="_blank" rel="noopener noreferrer">
                              {paper.link}
                          </a> <br />
+                         <p>Published: {paper.year}</p>
                          <em>Similarity Score:</em> {paper.similarity_score.toFixed(3)}
                     </li>
                 ))}
             </ul>
 
+            {/* Upload Paper */}
+             <div>
+                 <h3>Upload Paper</h3>
+                 <input
+                    type="file"
+                    onChange={(e) => setFile(e.target.files[0])}
+                 />
+                 <button onClick={uploadPaper}>Upload</button>
+             </div>
 
-            {/* List of Papers (if you want to keep this section for displaying all papers) */}
+            {/* List of Papers */}
             <h2>All Papers</h2>
             <ul>
                 {papers.map((paper) => (

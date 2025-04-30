@@ -32,7 +32,7 @@ class Paper(Base):
     __tablename__ = 'papers'
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    content = Column(Text, nullable=False)
+    content = Column(Text, nullable=True)
     abstract = Column(Text, nullable=False)
     file_path = Column(String, nullable=False)
 

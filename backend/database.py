@@ -3,13 +3,20 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from backend.models import Base, PaperSimilarity, engine
 
+# Database connection URL
 DATABASE_URL = "postgresql+psycopg2://postgres:csci440@localhost/research_db"  # Ensure this matches your actual PostgreSQL setup
 
+# Create the database engine
+engine = create_engine(DATABASE_URL, echo=True, pool_pre_ping=True)
+
+# Create a session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# Create database tables (if they don't exist)
 Base.metadata.create_all(bind=engine)
 
 
+# Dependency function to provide a database session
 def get_db():
     db = SessionLocal()
     try:
@@ -18,6 +25,7 @@ def get_db():
         db.close()
 
 
+# Function to store similarity scores in the database
 def store_similarity_scores(similarity_data, db: Session):
     """ Store similarity scores in the database. """
     for data in similarity_data:
@@ -31,10 +39,12 @@ def store_similarity_scores(similarity_data, db: Session):
     db.commit()
 
 
+# Function to store user preferences (NEW)
 def store_user_preferences(user_id: int, interests: str, db: Session):
     """ Store or update user research interests. """
     from backend.models import UserProfile
 
+    # Check if the user already has a profile
     user_profile = db.query(UserProfile).filter(UserProfile.user_id == user_id).first()
 
     if user_profile:
